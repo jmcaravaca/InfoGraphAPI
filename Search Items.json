@@ -1,0 +1,108 @@
+https://graph.microsoft.com/v1.0/search/query
+
+{
+    "requests": [
+        {
+            "entityTypes": [
+                "driveItem"
+            ],
+            "query": {
+                "queryString": "RPA2PRUEBA"
+            }
+        }
+    ]
+}
+
+
+{
+    "value": [
+        {
+            "searchTerms": [
+                "rpa2prueba"
+            ],
+            "hitsContainers": [
+                {
+                    "total": 0,
+                    "moreResultsAvailable": false
+                }
+            ]
+        }
+    ],
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.searchResponse)"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+{
+    "value": [
+        {
+            "searchTerms": [
+                "rpa2prueba"
+            ],
+            "hitsContainers": [
+                {
+                    "hits": [
+                        {
+                            "hitId": "01QNW2GLRVK32ZBPX6RBELBEXUM7PMACPI",
+                            "rank": 1,
+                            "summary": "/* miércoles, 11 de enero de 202315:19:11 User: RPA_BBDD_UserPre Server: BIPROCM0001 Database: ProcesosRPA_UiPath_PRE Application: */ PEPTI_Main<ddd/>",
+                            "resource": {
+                                "@odata.type": "#microsoft.graph.driveItem",
+                                "size": 344,
+                                "fileSystemInfo": {
+                                    "createdDateTime": "2023-05-11T13:28:59Z",
+                                    "lastModifiedDateTime": "2023-05-11T13:28:59Z"
+                                },
+                                "listItem": {
+                                    "@odata.type": "#microsoft.graph.listItem",
+                                    "fields": {},
+                                    "id": "90f55635-febe-4888-b092-f467dec009e8"
+                                },
+                                "id": "01QNW2GLRVK32ZBPX6RBELBEXUM7PMACPI",
+                                "createdBy": {
+                                    "user": {
+                                        "displayName": "Servicios.Financiero1RPA",
+                                        "email": "servicios.financiero1rpa@clarkemodet.com"
+                                    }
+                                },
+                                "createdDateTime": "2023-05-11T13:28:59Z",
+                                "lastModifiedBy": {
+                                    "user": {
+                                        "displayName": "Servicios.Financiero1RPA",
+                                        "email": "servicios.financiero1rpa@clarkemodet.com"
+                                    }
+                                },
+                                "lastModifiedDateTime": "2023-05-11T13:28:59Z",
+                                "name": "RPA2PRUEBA.txt",
+                                "parentReference": {
+                                    "driveId": "b!Q3CNXgoarkW7qfmBo8itF1tcex-FZg9Cnyfb7hGqByfipnrj5f8QSqEZp0CvdYtz",
+                                    "id": "01QNW2GLTXYWQX4B4YKBCJK6A3TMNIRFBQ",
+                                    "sharepointIds": {
+                                        "listId": "e37aa6e2-ffe5-4a10-a119-a740af758b73",
+                                        "listItemId": "7716",
+                                        "listItemUniqueId": "90f55635-febe-4888-b092-f467dec009e8"
+                                    },
+                                    "siteId": "clarkemodetcloud.sharepoint.com,5e8d7043-1a0a-45ae-bba9-f981a3c8ad17,1f7b5c5b-6685-420f-9f27-dbee11aa0727"
+                                },
+                                "webUrl": "https://clarkemodetcloud.sharepoint.com/sites/Shared/RPA/COEDF/RPAJORGEPRUEBA/RPA2PRUEBA.txt"
+                            }
+                        }
+                    ],
+                    "total": 1,
+                    "moreResultsAvailable": false
+                }
+            ]
+        }
+    ],
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.searchResponse)"
+}

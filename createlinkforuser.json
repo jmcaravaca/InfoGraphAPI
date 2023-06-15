@@ -1,0 +1,17 @@
+https://graph.microsoft.com/v1.0/drives/b!Q3CNXgoarkW7qfmBo8itF1tcex-FZg9Cnyfb7hGqByfipnrj5f8QSqEZp0CvdYtz/items/01QNW2GLS6FSNKDZSDLJAJFPYD5AKMAI6F/invite
+
+
+
+
+{
+    "recipients": [
+        {
+            "email": "jorge.caravaca@asesormasmovil.es"
+        }
+    ],
+    "message": "Here's the file that we're collaborating on.",
+    "requireSignIn": true,
+    "roles": [
+        "write"
+    ]
+}

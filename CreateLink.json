@@ -1,0 +1,44 @@
+https://graph.microsoft.com/v1.0/drives/b!Q3CNXgoarkW7qfmBo8itF1tcex-FZg9Cnyfb7hGqByfipnrj5f8QSqEZp0CvdYtz/items/01QNW2GLS6FSNKDZSDLJAJFPYD5AKMAI6F/createLink
+
+
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#permission",
+    "@odata.type": "#microsoft.graph.permission",
+    "id": "f3d45a95-e5dc-422e-85f2-2104ec38de1c",
+    "roles": [
+        "read"
+    ],
+    "shareId": "u!aHR0cHM6Ly9jbGFya2Vtb2RldGNsb3VkLnNoYXJlcG9pbnQuY29tLzpmOi9zL1NoYXJlZC9FbDRzbXFIbVExcEFrcjhENkJUQUk4VUJQUlYzSC1qd2JZazZhNmJXRTdBRE53",
+    "hasPassword": false,
+    "grantedToIdentitiesV2": [
+        {
+            "user": {
+                "@odata.type": "#microsoft.graph.sharePointIdentity",
+                "displayName": "María Díez",
+                "email": "mdiez@Clarkemodet.com",
+                "id": "b157fe59-a051-47ae-b4ee-0ff47b9eacc2"
+            },
+            "siteUser": {
+                "displayName": "María Díez",
+                "email": "mdiez@Clarkemodet.com",
+                "id": "439",
+                "loginName": "i:0#.f|membership|mdiez@clarkemodet.com"
+            }
+        }
+    ],
+    "grantedToIdentities": [
+        {
+            "user": {
+                "displayName": "María Díez",
+                "email": "mdiez@Clarkemodet.com",
+                "id": "b157fe59-a051-47ae-b4ee-0ff47b9eacc2"
+            }
+        }
+    ],
+    "link": {
+        "scope": "users",
+        "type": "view",
+        "webUrl": "https://clarkemodetcloud.sharepoint.com/:f:/s/Shared/El4smqHmQ1pAkr8D6BTAI8UBPRV3H-jwbYk6a6bWE7ADNw",
+        "preventsDownload": false
+    }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Mini Guia de Exchange Powershell</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="mini-guia-de-exchange-powershell">Mini Guia de Exchange Powershell</h1>
+<h1 id="sanity-check">Sanity Check</h1>
+<p><code>Get-Host</code></p>
+<p><code>$PSVersionTable</code></p>
+<h1 id="import-module">Import module</h1>
+<p><code>Import-Module ExchangeOnlineManagement</code></p>
+<h1 id="connect">Connect</h1>
+<p><code>Connect-ExchangeOnline -UserPrincipalName adm_COABE@clarkemodet.com -InlineCredential</code></p>
+<h1 id="remove-member-from-groups">Remove member from groups</h1>
+<p><code>Remove-DistributionGroupMember -Identity 083f89b8-af57-458c-814c-834c5ffabeae -Member bcc26e71-4823-4c28-94f3-ed41ae63a852</code></p>
+<h1 id="liz-saunders-can-modify-rick-hes-mailbox">Liz Saunders can modify Rick He's mailbox:</h1>
+<p><code>Add-MailboxPermission -Identity bcc26e71-4823-4c28-94f3-ed41ae63a852 -User f1e6c766-1bdd-44c5-8ec3-2dfae8ed66e2 -AccessRights FullAccess -InheritanceType All</code></p>
+<h1 id="rick-he-is-a-shared-mailbox-now">Rick He is a shared mailbox now</h1>
+<p><code>Set-Mailbox -Identity bcc26e71-4823-4c28-94f3-ed41ae63a852 -Type Shared</code></p>
+<h1 id="get-members-in-group">Get members in group</h1>
+<pre><code>$groups = Get-Group -Identity &quot;Es Team&quot;
+$groups.Members
+</code></pre>
+<p>El Identity puede ser también el ID (que sacamos de Graph API)</p>
+<h1 id="quitar-usuario-de-un-grupo">Quitar usuario de un grupo</h1>
+<pre><code> Remove-DistributionGroupMember -Identity 083f89b8-af57-458c-814c-834c5ffabeae -Member bcc26e71-4823-4c28-94f3-ed41ae63a852
+</code></pre>
+<p>-Identity del grupo (vale el nombre, o el ID, el ID lo podemos sacar fácilmente de Graph API)
+-Member vale el ID del miembro (Graph API, lo mejor) o el nombre interno (más difícil de ver)</p>
+<h1 id="docs">Docs</h1>
+<p>NOTA: Hay que instalar Powershell 7 en las maquinas</p>
+<p><a href="https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps">https://learn.microsoft.com/en-us/powershell/exchange/app-only-auth-powershell-v2?view=exchange-ps</a>
+<a href="https://learn.microsoft.com/en-us/powershell/exchange/connect-to-exchange-online-powershell?view=exchange-ps">https://learn.microsoft.com/en-us/powershell/exchange/connect-to-exchange-online-powershell?view=exchange-ps</a>
+<a href="https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell-v2?view=exchange-ps">https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell-v2?view=exchange-ps</a>
+<a href="https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell-v2?view=exchange-ps#install-and-maintain-the-exchange-online-powershell-module">https://learn.microsoft.com/en-us/powershell/exchange/exchange-online-powershell-v2?view=exchange-ps#install-and-maintain-the-exchange-online-powershell-module</a></p>
+<p><a href="https://learn.microsoft.com/en-us/exchange/recipients-in-exchange-online/manage-permissions-for-recipients#use-the-eac-to-assign-permissions-to-individual-mailboxes">https://learn.microsoft.com/en-us/exchange/recipients-in-exchange-online/manage-permissions-for-recipients#use-the-eac-to-assign-permissions-to-individual-mailboxes</a>
+<a href="https://learn.microsoft.com/en-us/powershell/module/exchange/remove-distributiongroupmember?view=exchange-ps">https://learn.microsoft.com/en-us/powershell/module/exchange/remove-distributiongroupmember?view=exchange-ps</a></p>
+
+        <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </body>
+    </html>

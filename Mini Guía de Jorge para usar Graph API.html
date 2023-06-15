@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Mini Gu&iacute;a de Jorge para usar Graph API y generar permisos a invitados</title>
+        <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+        
+    </head>
+    <body class="vscode-body vscode-light">
+        <h1 id="mini-guía-de-jorge-para-usar-graph-api-y-generar-permisos-a-invitados">Mini Guía de Jorge para usar Graph API y generar permisos a invitados</h1>
+<h1 id="graph-explorer">GRAPH EXPLORER</h1>
+<p>Para hacer todas las pruebas de forma rápida y sencilla, usamos GRAPH EXPLORER:</p>
+<p><a href="https://developer.microsoft.com/en-us/graph/graph-explorer">https://developer.microsoft.com/en-us/graph/graph-explorer</a></p>
+<p>También se puede usar Postman/Insomnia, pero el Graph Explorer es cómodo para la autenticación (no tenemos que preocuparnos de renovar token ni nada por el estilo)</p>
+<h1 id="cómo-obtener-la-autenticación-por-uipath">Cómo obtener la autenticación por UiPath</h1>
+<p>Se obtiene el token usando HTTP Request con client id + tenant + secret:</p>
+<pre><code class="language-json">POST https<span class="hljs-punctuation">:</span><span class="hljs-comment">//login.microsoftonline.com/b234bc80-a99d-4a47-8071-62b90ee1479b/oauth2/v2.0/token</span>
+
+https<span class="hljs-punctuation">:</span><span class="hljs-comment">//login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token</span>
+
+X URL FORM ENCODED
+
+client_id <span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>application id<span class="hljs-punctuation">}</span>
+scope <span class="hljs-punctuation">:</span> https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/.default</span>
+client_secret <span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>client secret<span class="hljs-punctuation">}</span>
+grant_type <span class="hljs-punctuation">:</span> client_credentials
+
+
+Response<span class="hljs-punctuation">:</span>
+
+<span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;token_type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Bearer&quot;</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;expires_in&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3599</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;ext_expires_in&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">3599</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;access_token&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;eyJ0eXAiOiJKV1QiLCJub25jZSI6Ik5LZURvWHluNWlhRC1zNl9LdW5xZms3OEhNTGlEVVpHNVN4ZUhLWTRlcHciLCJhbGciOiJSUzI1NiIsIng1dCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyIsImtpZCI6Ii1LSTNROW5OUjdiUm9meG1lWm9YcWJIWkdldyJ9.eyJhdWQiOiJodHRwczovL2dyYXBoLm1pY3Jvc29mdC5jb20iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC9iMjM0YmM4MC1hOTlkLTRhNDctODA3MS02MmI5MGVlMTQ3OWIvIiwiaWF0IjoxNjg2NzUzODAwLCJuYmYiOjE2ODY3NTM4MDAsImV4cCI6MTY4Njc1NzcwMCwiYWlvIjoiRTJaZ1lGakp6dHlXS0phdCtxZnE2Q3A1bFlPRkFBPT0iLCJhcHBfZGlzcGxheW5hbWUiOiJVSVBBVEgiLCJhcHBpZCI6ImU5OTUwNGZiLTI5OGItNGI5Mi1hMDI5LWMwYjFkOGYzM2MwZiIsImFwcGlkYWNyIjoiMSIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0L2IyMzRiYzgwLWE5OWQtNGE0Ny04MDcxLTYyYjkwZWUxNDc5Yi8iLCJpZHR5cCI6ImFwcCIsIm9pZCI6IjYzZjc4OTc2LTY5NTItNGI0OC1iMWFjLWUzODU5Zjg3MmNlOCIsInJoIjoiMC5BUXdBZ0x3MHNwMnBSMHFBY1dLNUR1Rkhtd01BQUFBQUFBQUF3QUFBQUFBQUFBQ1dBQUEuIiwicm9sZXMiOlsiTWFpbC5SZWFkV3JpdGUiLCJVc2VyLlJlYWRXcml0ZS5BbGwiLCJNYWlsLlJlYWRCYXNpYy5BbGwiLCJEaXJlY3RvcnkuUmVhZFdyaXRlLkFsbCIsIk1haWxib3hTZXR0aW5ncy5SZWFkIiwiU2l0ZXMuUmVhZC5BbGwiLCJTaXRlcy5SZWFkV3JpdGUuQWxsIiwiRmlsZXMuUmVhZFdyaXRlLkFsbCIsIkRpcmVjdG9yeS5SZWFkLkFsbCIsIlVzZXIuUmVhZC5BbGwiLCJGaWxlcy5SZWFkLkFsbCIsIk1haWwuUmVhZCIsIk1haWwuU2VuZCIsIk1haWxib3hTZXR0aW5ncy5SZWFkV3JpdGUiLCJNYWlsLlJlYWRCYXNpYyJdLCJzdWIiOiI2M2Y3ODk3Ni02OTUyLTRiNDgtYjFhYy1lMzg1OWY4NzJjZTgiLCJ0ZW5hbnRfcmVnaW9uX3Njb3BlIjoiRVUiLCJ0aWQiOiJiMjM0YmM4MC1hOTlkLTRhNDctODA3MS02MmI5MGVlMTQ3OWIiLCJ1dGkiOiJmT09jN3hVNlpreTFLeDQ1SzIxdkFBIiwidmVyIjoiMS4wIiwid2lkcyI6WyIwOTk3YTFkMC0wZDFkLTRhY2ItYjQwOC1kNWNhNzMxMjFlOTAiXSwieG1zX3RjZHQiOjE0MjU5MjU0MDcsInhtc190ZGJyIjoiRVUifQ.VVbyYqlTn9RfCsjxGme-9t6SMZybn6OmJJ-kYkl4fvROCjSbqiVO0rlyuisxh3VDyweHszEIx389Aw7gepiRwuCq1QYEwPDRmttU_LOgWIKhSWcSG18CiD-ZzH-RW8Bi7RF3PmAoHnLnqvdZE_su0OCcUt2yPC__nGgIc7wkGJgQlcRq5yaCpVz8YItHwXMiF2kt9yM9t77pIgHSEJPd8P5n3qmiiHju2wtDYNHhHrTW7BBL20hob999VWIQkO2Dx0xUX-kXfs8rXKHUQk3nfY7UYPSITCSW6z3FQqj7hDfzxjGVwkoI5iWHLUaw_WiY1m96eMVNM0aiPC9BgIg4Ew&quot;</span>
+<span class="hljs-punctuation">}</span>
+
+</code></pre>
+<p>En el resto de llamadas hay que añadir el header de Authorization: &quot;Bearer {token}&quot;</p>
+<h1 id="usuario">Usuario:</h1>
+<p><a href="mailto:Servicios.Financiero1RPA@clarkemodet.com">Servicios.Financiero1RPA@clarkemodet.com</a>
+XJMUMPGd8sWKTP</p>
+<p>URL Base del Sharepoint: <a href="https://clarkemodetcloud.sharepoint.com/sites/Shared/RPA">https://clarkemodetcloud.sharepoint.com/sites/Shared/RPA</a></p>
+<h1 id="grupo">Grupo</h1>
+<p>Se ha creado el grupo &quot;COEIF&quot; para asociar usuarios a él. No es 100% necesario usarlo pero por buenas prácticas estaría bien asignar los usuarios a dicho grupo:</p>
+<h2 id="get-user-groups">Get User Groups</h2>
+<pre><code class="language-json">GET https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/me/transitiveMemberOf/microsoft.graph.group?$count=true</span>
+
+RESPONSE (cropped)
+
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;435cb23d-bf76-4890-996a-f7bca74c8785&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;deletedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;classification&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;createdDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-05-12T08:13:41Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;creationOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Grgs_SP_RPA_COEIF&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;expirationDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;groupTypes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;isAssignableToRole&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mail&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mailEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mailNickname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Grgs_SP_RPA_COEIF&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;membershipRule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;membershipRuleProcessingState&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesDomainName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Clarkemodet.grupo&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesLastSyncDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-05-12T08:13:41Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesNetBiosName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CLARKEMODET&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSamAccountName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Grgs_SP_RPA_COEIF&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSecurityIdentifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;S-1-5-21-2128310829-2099726424-2028992-61687&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSyncEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredDataLocation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredLanguage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;proxyAddresses&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;renewedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-05-12T08:13:41Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;resourceBehaviorOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;resourceProvisioningOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;securityEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;securityIdentifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;S-1-12-1-1130148413-1217445750-3170331289-2240236711&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;theme&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;visibility&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesProvisioningErrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+
+</code></pre>
+<p>Lo importantes es el id</p>
+<h2 id="get-users-belonging-to-group-coeif">Get Users belonging to group (COEIF)</h2>
+<p>Con el id podemos comprobar los miembros:</p>
+<pre><code class="language-json">GET https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/groups/435cb23d-bf76-4890-996a-f7bca74c8785/members</span>
+
+RESPONSE<span class="hljs-punctuation">:</span>
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#directoryObjects&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;@odata.type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;#microsoft.graph.user&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1342e286-14c4-4cad-8427-a1e1d9606338&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;businessPhones&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Servicios.Financiero1RPA&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;givenName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Servicios.Financiero1RPA&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;jobTitle&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mail&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Servicios.Financiero1RPA@clarkemodet.com&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mobilePhone&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;officeLocation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredLanguage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;surname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;userPrincipalName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Servicios.Financiero1RPA@clarkemodet.com&quot;</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<h1 id="files-and-folders">Files and folders</h1>
+<p>Para asignar los permisos primero tenemos que encontrar el ID del archivo/carpeta, ambos se obtienen de la misma forma y tienen un ID asociado.</p>
+<p>EJEMPLO: Buscamos el archivo &quot;RPA2PRUEBA&quot; en todo el sharepoint</p>
+<pre><code class="language-json">POST https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/search/query</span>
+Body<span class="hljs-punctuation">:</span>
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;requests&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;entityTypes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                <span class="hljs-string">&quot;driveItem&quot;</span>
+            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;query&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;queryString&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;RPA2PRUEBA&quot;</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+
+
+
+RESPONSE<span class="hljs-punctuation">:</span>
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;searchTerms&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                <span class="hljs-string">&quot;rpa2prueba&quot;</span>
+            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;hitsContainers&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;hits&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                        <span class="hljs-punctuation">{</span>
+                            <span class="hljs-attr">&quot;hitId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;01QNW2GLRVK32ZBPX6RBELBEXUM7PMACPI&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;rank&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;summary&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;/* miércoles, 11 de enero de 202315:19:11 User: RPA_BBDD_UserPre Server: BIPROCM0001 Database: ProcesosRPA_UiPath_PRE Application: */ PEPTI_Main&lt;ddd/&gt;&quot;</span><span class="hljs-punctuation">,</span>
+                            <span class="hljs-attr">&quot;resource&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                <span class="hljs-attr">&quot;@odata.type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;#microsoft.graph.driveItem&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;size&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">344</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;fileSystemInfo&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;createdDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-05-11T13:28:59Z&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;lastModifiedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-05-11T13:28:59Z&quot;</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;listItem&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;@odata.type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;#microsoft.graph.listItem&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;fields&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;90f55635-febe-4888-b092-f467dec009e8&quot;</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;01QNW2GLRVK32ZBPX6RBELBEXUM7PMACPI&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;createdBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;user&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Servicios.Financiero1RPA&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;servicios.financiero1rpa@clarkemodet.com&quot;</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;createdDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-05-11T13:28:59Z&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;lastModifiedBy&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;user&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Servicios.Financiero1RPA&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;servicios.financiero1rpa@clarkemodet.com&quot;</span>
+                                    <span class="hljs-punctuation">}</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;lastModifiedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-05-11T13:28:59Z&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;RPA2PRUEBA.txt&quot;</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;parentReference&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                    <span class="hljs-attr">&quot;driveId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;b!Q3CNXgoarkW7qfmBo8itF1tcex-FZg9Cnyfb7hGqByfipnrj5f8QSqEZp0CvdYtz&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;01QNW2GLTXYWQX4B4YKBCJK6A3TMNIRFBQ&quot;</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;sharepointIds&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                                        <span class="hljs-attr">&quot;listId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;e37aa6e2-ffe5-4a10-a119-a740af758b73&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;listItemId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;7716&quot;</span><span class="hljs-punctuation">,</span>
+                                        <span class="hljs-attr">&quot;listItemUniqueId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;90f55635-febe-4888-b092-f467dec009e8&quot;</span>
+                                    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                    <span class="hljs-attr">&quot;siteId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;clarkemodetcloud.sharepoint.com,5e8d7043-1a0a-45ae-bba9-f981a3c8ad17,1f7b5c5b-6685-420f-9f27-dbee11aa0727&quot;</span>
+                                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                                <span class="hljs-attr">&quot;webUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://clarkemodetcloud.sharepoint.com/sites/Shared/RPA/COEDF/RPAJORGEPRUEBA/RPA2PRUEBA.txt&quot;</span>
+                            <span class="hljs-punctuation">}</span>
+                        <span class="hljs-punctuation">}</span>
+                    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;total&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;moreResultsAvailable&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">]</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#Collection(microsoft.graph.searchResponse)&quot;</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>NOTA: existen más parámetros posibles para la query de búsqueda, pero con el nombre debería ser suficiente. Lo importante nuevamente es el ID: en este caso es suficiente con el &quot;hitID&quot; <code>01QNW2GLRVK32ZBPX6RBELBEXUM7PMACPI</code> (valor único para cada archivo/carpeta)</p>
+<p>El DriveID también es importante pero no debería cambiar para el sharepoint indicado (/Shared/RPA): <code>b!Q3CNXgoarkW7qfmBo8itF1tcex-FZg9Cnyfb7hGqByfipnrj5f8QSqEZp0CvdYtz/items/01QNW2GLS6FSNKDZSDLJAJFPYD5AKMAI6F/invite</code></p>
+<h1 id="usuarios">Usuarios</h1>
+<p>Para poder darle permisos a un usuario que no estuviera ya en el dominio tenemos que hacer dos llamadas:</p>
+<h2 id="invitar-nuevo-usuario-externo-a-clarkemodet">Invitar nuevo usuario (externo) a ClarkeModet</h2>
+<pre><code class="language-json">POST https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/invitations</span>
+Body<span class="hljs-punctuation">:</span>
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;invitedUserEmailAddress&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jorge.caravaca@asesormasmovil.es&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;inviteRedirectUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://google.es&quot;</span>
+<span class="hljs-punctuation">}</span>
+
+RESPONSE<span class="hljs-punctuation">:</span>
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#invitations/$entity&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;e9848418-2915-43c8-a6d0-16ab8dbcd37c&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;inviteRedeemUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://login.microsoftonline.com/redeem?rd=https%3a%2f%2finvitations.microsoft.com%2fredeem%2f%3ftenant%3db234bc80-a99d-4a47-8071-62b90ee1479b%26user%3de9848418-2915-43c8-a6d0-16ab8dbcd37c%26ticket%3dqAa78d6hpbFF81W4FAG%25252b2U7rAtpZwE9dze3F%25252fJmMu98%25253d%26ver%3d2.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;invitedUserDisplayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;invitedUserType&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Guest&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;invitedUserEmailAddress&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jorge.caravaca@asesormasmovil.es&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;sendInvitationMessage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;resetRedemption&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;inviteRedirectUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://google.es/&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;PendingAcceptance&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;invitedUserMessageInfo&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;messageLanguage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;customizedMessageBody&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;ccRecipients&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+            <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;emailAddress&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;address&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">]</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;invitedUser&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;625b381b-42e8-421d-b8db-7ebe34f4cf1c&quot;</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>Nuevamente lo importante es el id de invitedUser.</p>
+<h2 id="usuario-ya-existente">Usuario ya existente</h2>
+<p>Podemos buscar el usuario así:</p>
+<pre><code class="language-json">GET https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/users?$filter=userType eq &#x27;Guest&#x27; and mail eq &#x27;jmcaravaca@minsait.com&#x27;</span>
+
+El &#x27;Guest&#x27; técnicamente no es necesario<span class="hljs-punctuation">,</span> es sólo para filtrar los invitados
+
+Sin Body
+
+Response<span class="hljs-punctuation">:</span>
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#users&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;businessPhones&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Caravaca Vidal, Jorge Manuel&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;givenName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;jobTitle&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mail&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jmcaravaca@minsait.com&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mobilePhone&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;officeLocation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredLanguage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;surname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;userPrincipalName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jmcaravaca_minsait.com#EXT#@clarkemodetcloud.onmicrosoft.com&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;4c2685b9-9dbb-4b9f-ba11-79a91d2617cf&quot;</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+
+De aquí podemos sacar ya el ID (si fuera necesario) o simplemente comprobar que ya está dado de alta en el dominio
+</code></pre>
+<h1 id="dar-acceso-al-usuario">Dar acceso al usuario</h1>
+<h2 id="dar-acceso-a-carpetaarchivo">Dar acceso a carpeta/archivo</h2>
+<pre><code class="language-json">POST https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/drives/b!Q3CNXgoarkW7qfmBo8itF1tcex-FZg9Cnyfb7hGqByfipnrj5f8QSqEZp0CvdYtz/items/01QNW2GLS6FSNKDZSDLJAJFPYD5AKMAI6F/invite</span>
+
+La url es de tipo /drives/<span class="hljs-punctuation">{</span>drive-id<span class="hljs-punctuation">}</span>/items/<span class="hljs-punctuation">{</span>item-id<span class="hljs-punctuation">}</span>/invite
+
+Body
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;recipients&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jorge.caravaca@asesormasmovil.es&quot;</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Here&#x27;s the file that we&#x27;re collaborating on.&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;requireSignIn&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;roles&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-string">&quot;write&quot;</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+
+
+Response<span class="hljs-punctuation">:</span>
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#Collection(permission)&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;@odata.type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;#microsoft.graph.permission&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;aTowIy5mfG1lbWJlcnNoaXB8am1jYXJhdmFjYV9taW5zYWl0LmNvbSNleHQjQGNsYXJrZW1vZGV0Y2xvdWQub25taWNyb3NvZnQuY29t&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;roles&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                <span class="hljs-string">&quot;write&quot;</span>
+            <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;grantedTo&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;user&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;jmcaravaca@minsait.com&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;4c2685b9-9dbb-4b9f-ba11-79a91d2617cf&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Caravaca Vidal, Jorge Manuel&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>Con esto el usuario ya tiene permiso para ver la carpeta/archivo, pero tenemos que generar un link. Aunque es posible que se pueda hacer con actividades de UiPath, también se puede hacer por API:</p>
+<pre><code class="language-json">https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/drives/b!Q3CNXgoarkW7qfmBo8itF1tcex-FZg9Cnyfb7hGqByfipnrj5f8QSqEZp0CvdYtz/items/01QNW2GLS6FSNKDZSDLJAJFPYD5AKMAI6F/createLink</span>
+
+
+La url es de tipo /drives/<span class="hljs-punctuation">{</span>drive-id<span class="hljs-punctuation">}</span>/items/<span class="hljs-punctuation">{</span>item-id<span class="hljs-punctuation">}</span>/createLink
+
+BODY<span class="hljs-punctuation">:</span>
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;edit&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;scope&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;users&quot;</span>
+<span class="hljs-punctuation">}</span>
+
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#permission&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;@odata.type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;#microsoft.graph.permission&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;f3d45a95-e5dc-422e-85f2-2104ec38de1c&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;roles&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-string">&quot;read&quot;</span>
+    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;shareId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;u!aHR0cHM6Ly9jbGFya2Vtb2RldGNsb3VkLnNoYXJlcG9pbnQuY29tLzpmOi9zL1NoYXJlZC9FbDRzbXFIbVExcEFrcjhENkJUQUk4VUJQUlYzSC1qd2JZazZhNmJXRTdBRE53&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;hasPassword&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;grantedToIdentitiesV2&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;user&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;@odata.type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;#microsoft.graph.sharePointIdentity&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;María Díez&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;mdiez@Clarkemodet.com&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;b157fe59-a051-47ae-b4ee-0ff47b9eacc2&quot;</span>
+            <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;siteUser&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;María Díez&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;mdiez@Clarkemodet.com&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;439&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;loginName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;i:0#.f|membership|mdiez@clarkemodet.com&quot;</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;grantedToIdentities&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;user&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+                <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;María Díez&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;mdiez@Clarkemodet.com&quot;</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;b157fe59-a051-47ae-b4ee-0ff47b9eacc2&quot;</span>
+            <span class="hljs-punctuation">}</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;link&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;scope&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;users&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;view&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;webUrl&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://clarkemodetcloud.sharepoint.com/:f:/s/Shared/El4smqHmQ1pAkr8D6BTAI8UBPRV3H-jwbYk6a6bWE7ADNw&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;preventsDownload&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>La URL está en webURL</p>
+<h1 id="licencias">Licencias</h1>
+<h2 id="listar-licencias-de-usuario">Listar licencias de usuario</h2>
+<pre><code class="language-json">
+GET https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/users/bcc26e71-4823-4c28-94f3-ed41ae63a852/licenseDetails</span>
+
+URL es https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/users/{user_id}}/licenseDetails</span>
+
+Sin Body
+
+Response<span class="hljs-punctuation">:</span>
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#users(&#x27;bcc26e71-4823-4c28-94f3-ed41ae63a852&#x27;)/licenseDetails&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;gLw0sp2pR0qAcWK5DuFHm8zrA6Tg-qJMjIx6kH_WwjU&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;skuId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;a403ebcc-fae0-4ca2-8c8c-7a907fd6c235&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;skuPartNumber&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;POWER_BI_STANDARD&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;servicePlans&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;servicePlanId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;113feb6c-3fe4-4440-bddc-54d774bf0318&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;servicePlanName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;EXCHANGE_S_FOUNDATION&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;provisioningStatus&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Success&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;appliesTo&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Company&quot;</span>
+                <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+                <span class="hljs-punctuation">{</span>
+                    <span class="hljs-attr">&quot;servicePlanId&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2049e525-b859-401b-b2a0-e0a31c4b1fe4&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;servicePlanName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;BI_AZURE_P0&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;provisioningStatus&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Success&quot;</span><span class="hljs-punctuation">,</span>
+                    <span class="hljs-attr">&quot;appliesTo&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;User&quot;</span>
+                <span class="hljs-punctuation">}</span>
+            <span class="hljs-punctuation">]</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+
+
+
+</code></pre>
+<p>De aquí lo importante son los &quot;skuId&quot; de cada elemento del value (value es un array de elementos, es decir, de licencias) para luego poder quitar la licencia</p>
+<h2 id="asignar-licencia-quitar-yo-poner">Asignar licencia (quitar y/o poner)</h2>
+<pre><code class="language-json">
+POST https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/users/bcc26e71-4823-4c28-94f3-ed41ae63a852/assignLicense</span>
+
+URL es https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/users/{user_id}}/assignLicense</span>
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;addLicenses&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;removeLicenses&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-string">&quot;a403ebcc-fae0-4ca2-8c8c-7a907fd6c235&quot;</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+
+Response<span class="hljs-punctuation">:</span>
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#users/$entity&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;businessPhones&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Ricky He&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;givenName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Ricky He&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;jobTitle&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Operations trainee&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;mail&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;mobilePhone&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;officeLocation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Rio de Janeiro&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;preferredLanguage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;surname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;He&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;userPrincipalName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;rhe@clarkemodetcloud.onmicrosoft.com&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;bcc26e71-4823-4c28-94f3-ed41ae63a852&quot;</span>
+<span class="hljs-punctuation">}</span>
+
+
+Si la licencia no estuviera asignada<span class="hljs-punctuation">,</span> devuelve un <span class="hljs-number">400</span><span class="hljs-punctuation">:</span>
+
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;error&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;code&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Request_BadRequest&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;User does not have a corresponding license.&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;innerError&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;date&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-06-14T08:55:17&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;request-id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;a8735d07-fff4-46e7-ad65-05906abcd50f&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;client-request-id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;50d497ad-25bd-f2f1-868b-b34a5d9662a4&quot;</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+
+
+</code></pre>
+<p>El body tiene que incluir ambas keys aunque esté vacío (en el ejmplo, sólo quitamos una licencia)</p>
+<h1 id="groups">Groups</h1>
+<h2 id="listar-grupos-del-usuario">Listar Grupos del usuario</h2>
+<pre><code class="language-json">GET  https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/users/bcc26e71-4823-4c28-94f3-ed41ae63a852/memberOf</span>
+
+URL es https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/users/{user_id}/memberOf</span>
+
+
+
+Response<span class="hljs-punctuation">:</span>
+
+<span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#directoryObjects&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;value&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;@odata.type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;#microsoft.graph.group&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;c785150c-5d23-4dd5-a33e-389e98559c8d&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;deletedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;classification&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;createdDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2021-11-10T15:45:02Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;creationOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Grgs_ES_Team&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;expirationDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;groupTypes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;isAssignableToRole&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mail&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mailEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mailNickname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Grgs_ES_Team&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;membershipRule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;membershipRuleProcessingState&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesDomainName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Clarkemodet.grupo&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesLastSyncDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-06-14T08:23:10Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesNetBiosName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CLARKEMODET&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSamAccountName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Grgs_ES_Team&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSecurityIdentifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;S-1-5-21-2128310829-2099726424-2028992-59628&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSyncEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredDataLocation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredLanguage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;proxyAddresses&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;renewedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2021-11-10T15:45:02Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;resourceBehaviorOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;resourceProvisioningOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;securityEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;securityIdentifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;S-1-12-1-3347387660-1305828643-2654486179-2375832984&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;theme&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;visibility&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesProvisioningErrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;@odata.type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;#microsoft.graph.group&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;9e48a453-2dd7-48c8-9b3e-d86f37d1e74a&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;deletedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;classification&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;createdDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2021-11-10T15:45:02Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;creationOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Grgs_CTO_Corporate&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;expirationDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;groupTypes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;isAssignableToRole&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mail&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mailEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mailNickname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Grgs_CTO_Corporate&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;membershipRule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;membershipRuleProcessingState&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesDomainName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Clarkemodet.grupo&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesLastSyncDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-06-14T08:23:10Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesNetBiosName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CLARKEMODET&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSamAccountName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Grgs_CTO_Corporate&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSecurityIdentifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;S-1-5-21-2128310829-2099726424-2028992-59626&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSyncEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredDataLocation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredLanguage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;proxyAddresses&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;renewedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2021-11-10T15:45:02Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;resourceBehaviorOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;resourceProvisioningOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;securityEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;securityIdentifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;S-1-12-1-2655560787-1221078487-1876442779-1256706359&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;theme&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;visibility&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesProvisioningErrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span>
+        <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-punctuation">{</span>
+            <span class="hljs-attr">&quot;@odata.type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;#microsoft.graph.group&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;4f2c24e3-3f59-41f6-adbe-8516c977a9ef&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;deletedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;classification&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;createdDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2021-12-27T12:56:19Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;creationOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;description&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Acceso 2F al portal de Citrix (NetScaler). Si el usuario tiene 2F activado en Office 365, le saltará el doble factor. Si no, le solicitará credenciales sin doble factor. La pertenencia a este grupo es requisito obligatorio para todos los usuarios que tengan que autenticarse por 2F para acceder al portal de Citrix.&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;displayName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CTXACC_PRO&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;expirationDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;groupTypes&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;isAssignableToRole&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mail&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mailEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">false</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;mailNickname&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CTXACC_PRO&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;membershipRule&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;membershipRuleProcessingState&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesDomainName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Clarkemodet.grupo&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesLastSyncDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-06-14T08:23:10Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesNetBiosName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CLARKEMODET&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSamAccountName&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CTXACC_PRO&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSecurityIdentifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;S-1-5-21-2128310829-2099726424-2028992-60241&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesSyncEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredDataLocation&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;preferredLanguage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;proxyAddresses&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;renewedDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2021-12-27T12:56:19Z&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;resourceBehaviorOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;resourceProvisioningOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;securityEnabled&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">true</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;securityIdentifier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;S-1-12-1-1328293091-1106657113-377863853-4020860873&quot;</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;theme&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;visibility&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-keyword">null</span><span class="hljs-punctuation">,</span>
+            <span class="hljs-attr">&quot;onPremisesProvisioningErrors&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span>
+        <span class="hljs-punctuation">}</span>
+    <span class="hljs-punctuation">]</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<p>Tenemos un array de los grupos, para luego quitar los grupos tenemos que coger los id de cada elemento (el Id de usuario también lo necesitaremos)</p>
+<h2 id="check-user-in-group">Check user in group</h2>
+<pre><code class="language-json">
+https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/groups/4f2c24e3-3f59-41f6-adbe-8516c977a9ef/members?$count=true&amp;$filter=userPrincipalName eq &#x27;rhe@clarkemodetcloud.onmicrosoft.com&#x27;</span>
+
+
+
+</code></pre>
+<h2 id="quitar-grupos">Quitar grupos</h2>
+<p>No funciona por Graph para la mayoría de grupos -&gt; Los de Active Directory se quitan desde active directory, y los de &quot;mail&quot; (listas de distribución) se quitan desde Exchange</p>
+<h1 id="mailboxautoreply">Mailbox/AutoReply</h1>
+<h2 id="comprobar-autoreply">Comprobar Autoreply</h2>
+<pre><code class="language-json">
+GET https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/users/bcc26e71-4823-4c28-94f3-ed41ae63a852/mailboxSettings</span>
+
+users/<span class="hljs-punctuation">{</span>userid<span class="hljs-punctuation">}</span>/mailboxSettings
+
+RESPONSE<span class="hljs-punctuation">:</span>
+<span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;@odata.context&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;https://graph.microsoft.com/v1.0/$metadata#users(&#x27;bcc26e71-4823-4c28-94f3-ed41ae63a852&#x27;)/mailboxSettings&quot;</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;archiveFolder&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;AQMkAGViNDY5Yjc4LTQxZTEtNDM2NS04MGRjLWMxODFhNzYwZWI1YQAuAAADEoK1AdBX-kGb9HAbeosvKwEATwhdCs1nGECDOB1s1lu4ZQAAAgETAAAA&quot;</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;delegateMeetingMessageDeliveryOptions&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;sendToDelegateOnly&quot;</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;userPurpose&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;user&quot;</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;automaticRepliesSetting&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;disabled&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;externalAudience&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;internalReplyMessage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;externalReplyMessage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;scheduledStartDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;dateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-06-14T14:00:00.0000000&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;timeZone&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;UTC&quot;</span>
+		<span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;scheduledEndDateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+			<span class="hljs-attr">&quot;dateTime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-06-15T14:00:00.0000000&quot;</span><span class="hljs-punctuation">,</span>
+			<span class="hljs-attr">&quot;timeZone&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;UTC&quot;</span>
+		<span class="hljs-punctuation">}</span>
+	<span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;language&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+	<span class="hljs-attr">&quot;workingHours&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+</code></pre>
+<h2 id="set-autoreply">Set Autoreply</h2>
+<pre><code class="language-json">PATCH https<span class="hljs-punctuation">:</span><span class="hljs-comment">//graph.microsoft.com/v1.0/users/bcc26e71-4823-4c28-94f3-ed41ae63a852/mailboxSettings</span>
+
+users/<span class="hljs-punctuation">{</span>user-id<span class="hljs-punctuation">}</span>/mailboxSettings
+(Igual que el de GET)
+
+BODY<span class="hljs-punctuation">:</span>
+
+<span class="hljs-punctuation">{</span>
+	<span class="hljs-attr">&quot;automaticRepliesSetting&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+		<span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;alwaysEnabled&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;externalAudience&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;all&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;internalReplyMessage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Hola, estoy de vacaciones&quot;</span><span class="hljs-punctuation">,</span>
+		<span class="hljs-attr">&quot;externalReplyMessage&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Hola, estoy de vacaciones&quot;</span>
+	<span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span>
+
+RESPONSE<span class="hljs-punctuation">:</span>
+
+Igual que el Get
+</code></pre>
+<p>Dentro del body ponemos las keys que queremos cambiar, en principio, con cambiar el status y los mensajes debería ser suficiente. Si hay que ponerlo programado, el status es scheduled</p>
+<h1 id="docs">Docs</h1>
+<p><a href="https://developer.microsoft.com/en-us/graph/graph-explorer">https://developer.microsoft.com/en-us/graph/graph-explorer</a></p>
+<p><a href="https://learn.microsoft.com/en-us/graph/use-the-api?context=graph%2Fapi%2F1.0&amp;view=graph-rest-1.0">https://learn.microsoft.com/en-us/graph/use-the-api?context=graph%2Fapi%2F1.0&amp;view=graph-rest-1.0</a></p>
+<p><a href="https://stackoverflow.com/questions/68863841/microsoft-graph-create-share-link-for-specific-people">https://stackoverflow.com/questions/68863841/microsoft-graph-create-share-link-for-specific-people</a></p>
+
+        <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+        
+    </body>
+    </html>

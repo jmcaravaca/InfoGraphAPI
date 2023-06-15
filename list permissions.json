@@ -1,0 +1,214 @@
+https://graph.microsoft.com/v1.0/drives/b!Q3CNXgoarkW7qfmBo8itF1tcex-FZg9Cnyfb7hGqByfipnrj5f8QSqEZp0CvdYtz/items/01QNW2GLS6FSNKDZSDLJAJFPYD5AKMAI6F/permissions
+
+
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#drives('b%21Q3CNXgoarkW7qfmBo8itF1tcex-FZg9Cnyfb7hGqByfipnrj5f8QSqEZp0CvdYtz')/items('01QNW2GLS6FSNKDZSDLJAJFPYD5AKMAI6F')/permissions",
+    "value": [
+        {
+            "id": "4c932a60-f33a-40f1-b7d5-7c139f6a1335",
+            "roles": [
+                "write"
+            ],
+            "shareId": "u!aHR0cHM6Ly9jbGFya2Vtb2RldGNsb3VkLnNoYXJlcG9pbnQuY29tLzpmOi9zL1NoYXJlZC9FbDRzbXFIbVExcEFrcjhENkJUQUk4VUJoT2tJWnFSTVNlRDNzY2VKZVVHdWln",
+            "hasPassword": false,
+            "grantedToIdentitiesV2": [
+                {
+                    "user": {
+                        "@odata.type": "#microsoft.graph.sharePointIdentity",
+                        "displayName": "Luciana Lima",
+                        "email": "LLima@clarkemodet.com",
+                        "id": "1c0c50bf-d83e-4cc0-8687-cc042d94f257"
+                    },
+                    "siteUser": {
+                        "displayName": "Luciana Lima",
+                        "email": "LLima@clarkemodet.com",
+                        "id": "680",
+                        "loginName": "i:0#.f|membership|llima@clarkemodet.com"
+                    }
+                }
+            ],
+            "grantedToIdentities": [
+                {
+                    "user": {
+                        "displayName": "Luciana Lima",
+                        "email": "LLima@clarkemodet.com",
+                        "id": "1c0c50bf-d83e-4cc0-8687-cc042d94f257"
+                    }
+                }
+            ],
+            "link": {
+                "scope": "users",
+                "type": "edit",
+                "webUrl": "https://clarkemodetcloud.sharepoint.com/:f:/s/Shared/El4smqHmQ1pAkr8D6BTAI8UBhOkIZqRMSeD3sceJeUGuig",
+                "preventsDownload": false
+            }
+        },
+        {
+            "id": "f3d45a95-e5dc-422e-85f2-2104ec38de1c",
+            "roles": [
+                "read"
+            ],
+            "shareId": "u!aHR0cHM6Ly9jbGFya2Vtb2RldGNsb3VkLnNoYXJlcG9pbnQuY29tLzpmOi9zL1NoYXJlZC9FbDRzbXFIbVExcEFrcjhENkJUQUk4VUJQUlYzSC1qd2JZazZhNmJXRTdBRE53",
+            "hasPassword": false,
+            "grantedToIdentitiesV2": [
+                {
+                    "user": {
+                        "@odata.type": "#microsoft.graph.sharePointIdentity",
+                        "displayName": "María Díez",
+                        "email": "mdiez@Clarkemodet.com",
+                        "id": "b157fe59-a051-47ae-b4ee-0ff47b9eacc2"
+                    },
+                    "siteUser": {
+                        "displayName": "María Díez",
+                        "email": "mdiez@Clarkemodet.com",
+                        "id": "439",
+                        "loginName": "i:0#.f|membership|mdiez@clarkemodet.com"
+                    }
+                }
+            ],
+            "grantedToIdentities": [
+                {
+                    "user": {
+                        "displayName": "María Díez",
+                        "email": "mdiez@Clarkemodet.com",
+                        "id": "b157fe59-a051-47ae-b4ee-0ff47b9eacc2"
+                    }
+                }
+            ],
+            "link": {
+                "scope": "users",
+                "type": "view",
+                "webUrl": "https://clarkemodetcloud.sharepoint.com/:f:/s/Shared/El4smqHmQ1pAkr8D6BTAI8UBPRV3H-jwbYk6a6bWE7ADNw",
+                "preventsDownload": false
+            }
+        },
+        {
+            "id": "a3734c6f-ac8a-46b5-b69f-43ea7825890c",
+            "roles": [
+                "read"
+            ],
+            "shareId": "u!aHR0cHM6Ly9jbGFya2Vtb2RldGNsb3VkLnNoYXJlcG9pbnQuY29tLzpmOi9zL1NoYXJlZC9FbDRzbXFIbVExcEFrcjhENkJUQUk4VUJfcml5Znp6V1JfV0VldWZfSG5KTWln",
+            "hasPassword": false,
+            "grantedToIdentitiesV2": [],
+            "grantedToIdentities": [],
+            "link": {
+                "scope": "organization",
+                "type": "view",
+                "webUrl": "https://clarkemodetcloud.sharepoint.com/:f:/s/Shared/El4smqHmQ1pAkr8D6BTAI8UB_riyfzzWR_WEeuf_HnJMig",
+                "preventsDownload": false
+            }
+        },
+        {
+            "id": "aTowIy5mfG1lbWJlcnNoaXB8YWN1ZWxsYXJAY2xhcmtlbW9kZXQuY29t",
+            "roles": [
+                "write"
+            ],
+            "shareId": "aTowIy5mfG1lbWJlcnNoaXB8YWN1ZWxsYXJAY2xhcmtlbW9kZXQuY29t",
+            "grantedToV2": {
+                "user": {
+                    "@odata.type": "#microsoft.graph.sharePointIdentity",
+                    "displayName": "Arantza Cuellar",
+                    "email": "acuellar@clarkemodet.com",
+                    "id": "0447da8e-1825-4bc9-a3f6-d4c932f07a17"
+                },
+                "siteUser": {
+                    "displayName": "Arantza Cuellar",
+                    "email": "acuellar@clarkemodet.com",
+                    "id": "700",
+                    "loginName": "i:0#.f|membership|acuellar@clarkemodet.com"
+                }
+            },
+            "grantedTo": {
+                "user": {
+                    "displayName": "Arantza Cuellar",
+                    "email": "acuellar@clarkemodet.com",
+                    "id": "0447da8e-1825-4bc9-a3f6-d4c932f07a17"
+                }
+            }
+        },
+        {
+            "id": "aTowIy5mfG1lbWJlcnNoaXB8c2VydmljaW9zLmZpbmFuY2llcm8xcnBhQGNsYXJrZW1vZGV0LmNvbQ",
+            "roles": [
+                "owner"
+            ],
+            "shareId": "aTowIy5mfG1lbWJlcnNoaXB8c2VydmljaW9zLmZpbmFuY2llcm8xcnBhQGNsYXJrZW1vZGV0LmNvbQ",
+            "grantedToV2": {
+                "user": {
+                    "@odata.type": "#microsoft.graph.sharePointIdentity",
+                    "displayName": "Servicios.Financiero1RPA",
+                    "email": "Servicios.Financiero1RPA@clarkemodet.com",
+                    "id": "1342e286-14c4-4cad-8427-a1e1d9606338"
+                },
+                "siteUser": {
+                    "displayName": "Servicios.Financiero1RPA",
+                    "email": "Servicios.Financiero1RPA@clarkemodet.com",
+                    "id": "786",
+                    "loginName": "i:0#.f|membership|servicios.financiero1rpa@clarkemodet.com"
+                }
+            },
+            "grantedTo": {
+                "user": {
+                    "displayName": "Servicios.Financiero1RPA",
+                    "email": "Servicios.Financiero1RPA@clarkemodet.com",
+                    "id": "1342e286-14c4-4cad-8427-a1e1d9606338"
+                }
+            }
+        },
+        {
+            "id": "aTowIy5mfG1lbWJlcnNoaXB8amF2aWVyLnN1YXJlel9kZXZvbC5lcyNleHQjQGNsYXJrZW1vZGV0Y2xvdWQub25taWNyb3NvZnQuY29t",
+            "roles": [
+                "read"
+            ],
+            "shareId": "aTowIy5mfG1lbWJlcnNoaXB8amF2aWVyLnN1YXJlel9kZXZvbC5lcyNleHQjQGNsYXJrZW1vZGV0Y2xvdWQub25taWNyb3NvZnQuY29t",
+            "grantedToV2": {
+                "user": {
+                    "@odata.type": "#microsoft.graph.sharePointIdentity",
+                    "displayName": "Javier Suarez",
+                    "email": "javier.suarez@devol.es",
+                    "id": "a85c5f6a-9168-4a1b-b478-ccd99517ed2c"
+                },
+                "siteUser": {
+                    "displayName": "Javier Suarez",
+                    "email": "javier.suarez@devol.es",
+                    "id": "790",
+                    "loginName": "i:0#.f|membership|javier.suarez_devol.es#ext#@clarkemodetcloud.onmicrosoft.com"
+                }
+            },
+            "grantedTo": {
+                "user": {
+                    "displayName": "Javier Suarez",
+                    "email": "javier.suarezx@devol.es",
+                    "id": "a85c5f6a-9168-4a1b-b478-ccd99517ed2c"
+                }
+            }
+        },
+        {
+            "id": "aTowIy5mfG1lbWJlcnNoaXB8eGFiaWVyLm1hcnRpbmV6X2Rldm9sLmVzI2V4dCNAY2xhcmtlbW9kZXRjbG91ZC5vbm1pY3Jvc29mdC5jb20",
+            "roles": [
+                "write"
+            ],
+            "shareId": "aTowIy5mfG1lbWJlcnNoaXB8eGFiaWVyLm1hcnRpbmV6X2Rldm9sLmVzI2V4dCNAY2xhcmtlbW9kZXRjbG91ZC5vbm1pY3Jvc29mdC5jb20",
+            "grantedToV2": {
+                "user": {
+                    "@odata.type": "#microsoft.graph.sharePointIdentity",
+                    "displayName": "Xabier Martínez",
+                    "email": "xabier.martinez@devol.es",
+                    "id": "0c170ce6-939b-4f37-aebb-57d7f0bed80a"
+                },
+                "siteUser": {
+                    "displayName": "Xabier Martínez",
+                    "email": "xabier.martinez@devol.es",
+                    "id": "792",
+                    "loginName": "i:0#.f|membership|xabier.martinez_devol.es#ext#@clarkemodetcloud.onmicrosoft.com"
+                }
+            },
+            "grantedTo": {
+                "user": {
+                    "displayName": "Xabier Martínez",
+                    "email": "xabier.martinez@devol.es",
+                    "id": "0c170ce6-939b-4f37-aebb-57d7f0bed80a"
+                }
+            }
+        }
+    ]
+}

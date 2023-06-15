@@ -1,0 +1,27 @@
+{
+    "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#invitations/$entity",
+    "id": "3e03df8d-78f1-4550-825d-78f2ac01b469",
+    "inviteRedeemUrl": "https://login.microsoftonline.com/redeem?rd=https%3a%2f%2finvitations.microsoft.com%2fredeem%2f%3ftenant%3db234bc80-a99d-4a47-8071-62b90ee1479b%26user%3d3e03df8d-78f1-4550-825d-78f2ac01b469%26ticket%3dkGeb36kVtJGF7x8u1XeoLmowxrnvPa4eUTzFg9wVzXw%25253d%26ver%3d2.0",
+    "invitedUserDisplayName": null,
+    "invitedUserType": "Guest",
+    "invitedUserEmailAddress": "jorge42caravaca@gmail.com",
+    "sendInvitationMessage": false,
+    "resetRedemption": false,
+    "inviteRedirectUrl": "https://google.es/",
+    "status": "PendingAcceptance",
+    "invitedUserMessageInfo": {
+        "messageLanguage": null,
+        "customizedMessageBody": null,
+        "ccRecipients": [
+            {
+                "emailAddress": {
+                    "name": null,
+                    "address": null
+                }
+            }
+        ]
+    },
+    "invitedUser": {
+        "id": "b1a41dad-ed35-460a-ad83-e88e1da654dc"
+    }
+}
